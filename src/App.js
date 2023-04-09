@@ -1,29 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './style.css';
-import { board } from './board/board';
+import { board, make2dcopy } from './board/board';
 
 export default function App() {
-  const [fields, setFields] = useState(board);
+  const [fields, setFields] = useState(make2dcopy(board));
 
   const changeColor = (row, column) => {
-    console.log(row, column);
+    const updatedFields = [...fields];
+    updatedFields[row][column] = 'red';
+    setFields(updatedFields);
+  };
+  const resetField = () => {
+    setFields(make2dcopy(board));
+  };
+  const diagnoltopleft = (row, column) => {
+    if (row >= 0 && column >= 0) {
+      changeColor(row, column);
+      diagnoltopleft(row - 1, column - 1);
+    }
+  };
+  const diagnolbottomright = (row, column) => {
+    if (row <= 7 && column <= 7) {
+      changeColor(row, column);
+      diagnolbottomright(row + 1, column + 1);
+    }
+  };
+  const diagnolbottomleft = (row, column) => {
+    if (row <= 7 && column >= 0) {
+      changeColor(row, column);
+      diagnolbottomleft(row + 1, column - 1);
+    }
+  };
+  const diagnoltopright = (row, column) => {
+    if (row >= 0 && column <= 7) {
+      changeColor(row, column);
+      diagnoltopright(row - 1, column + 1);
+    }
   };
   return (
-    <div className="field-container">
-      {fields.map((e, i) => {
-        return e.map((e1, i1) => {
-          return (
-            <div
-              className="field"
-              key={i + i1}
-              style={{ background: `${e1}` }}
-              onClick={() => {
-                changeColor(i, i1);
-              }}
-            ></div>
-          );
-        });
-      })}
+    <div>
+      <div className="field-container">
+        {fields.map((e, row) => {
+          return e.map((e1, column) => {
+            return (
+              <div
+                className="field"
+                key={row + column}
+                style={{ background: `${e1}` }}
+                onClick={() => {
+                  resetField();
+                  diagnoltopleft(row, column);
+                  diagnoltopright(row, column);
+                  diagnolbottomright(row, column);
+                  diagnolbottomleft(row, column);
+                }}
+              ></div>
+            );
+          });
+        })}
+      </div>
+      <div className="btn" onClick={resetField}>
+        clear
+      </div>
     </div>
   );
 }
